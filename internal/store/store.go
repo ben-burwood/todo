@@ -8,7 +8,7 @@ import (
 	"todo/internal/todo"
 )
 
-const TodoStoreFile = "todos.json"
+const TodoStoreFile = "store/todos.json"
 
 var mu sync.Mutex
 
@@ -33,6 +33,10 @@ func loadTodos() ([]todo.Todo, error) {
 
 // saveTodos writes the todos to the JSON file
 func saveTodos(todos []todo.Todo) error {
+	if err := os.MkdirAll("store", os.ModePerm); err != nil {
+		return err
+	}
+
 	file, err := os.Create(TodoStoreFile)
 	if err != nil {
 		return err

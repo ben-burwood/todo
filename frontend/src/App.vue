@@ -1,13 +1,14 @@
 <template>
     <div class="min-h-screen min-w-screen bg-base-200">
-        <ThemeSwitcher class="fixed top-4 right-4" />
+        <ThemeSwitcher class="absolute top-4 right-4" />
 
         <div class="flex flex-col items-center justify-center p-5 w-lg mx-auto">
-            <h1 class="text-4xl font-bold">Todo</h1>
+            <h1 class="text-4xl font-bold">ToDo</h1>
 
-            <Entry @add="addTodo" class="m-5 w-full" />
+            <Entry @add="addTodo" class="mt-5 w-full" />
+            <div class="divider"></div>
 
-            <div class="m-5 flex flex-col gap-2">
+            <div class="flex flex-col gap-2">
                 <span v-if="outstandingTodos.length === 0" class="text-4xl">🎉</span>
                 <Todo
                     class="w-md"
@@ -19,10 +20,9 @@
                     @completed="toggleCompleted(todo.uuid)"
                 />
             </div>
-            <div v-if="completedTodos.length > 0">
-                <div class="divider"></div>
-                <div class="flex flex-row justify-between">
-                    <span class="collapse-title text-gray-500">Completed ({{ completedTodos.length }})</span>
+            <div class="mt-10" v-if="completedTodos.length > 0">
+                <div class="flex flex-row justify-between items-center m-2 mb-4">
+                    <span class="text-gray-500">Completed ({{ completedTodos.length }})</span>
                     <button class="btn btn-sm btn-outline btn-error" @click="clearCompleted">Clear</button>
                 </div>
                 <div class="flex flex-col gap-2">
@@ -36,43 +36,81 @@
                     />
                 </div>
             </div>
+
+            <div v-if="errorMessage" role="alert" class="alert alert-error fixed bottom-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                </svg>
+                {{ errorMessage }}
+            </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import Entry from "@/components/Entry.vue";
 import Todo from "@/components/Todo.vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
 import { SERVER_URL } from "@/main";
+
+const errorMessage = ref("");
+// clear error after 5 seconds
+watch(errorMessage, (newError) => {
+    if (newError) {
+        setTimeout(() => {
+            errorMessage.value = "";
+        }, 5000);
+    }
+});
 
 const todos = ref<{ uuid: string; title: string; completed: boolean }[]>([]);
 const outstandingTodos = computed(() => todos.value.filter((todo) => !todo.completed));
 const completedTodos = computed(() => todos.value.filter((todo) => todo.completed));
 
 async function fetchTodos() {
-    const res = await fetch(`${SERVER_URL}/todos`);
-    todos.value = await res.json();
+    try {
+        const res = await fetch(`${SERVER_URL}/todos`);
+        todos.value = await res.json();
+    } catch (error) {
+        errorMessage.value = `Error: Fetching Todos : ${error.message}`;
+    }
 }
 onMounted(fetchTodos);
 
 async function addTodo(title: string) {
-    const res = await fetch(`${SERVER_URL}/todos/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title }),
-    });
-    if (res.ok) await fetchTodos();
+    try {
+        const res = await fetch(`${SERVER_URL}/todos/create`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title }),
+        });
+        await fetchTodos();
+    } catch (error) {
+        errorMessage.value = `Error: Adding Todo : ${error.message}`;
+    }
 }
 
 async function toggleCompleted(uuid: string) {
-    const res = await fetch(`${SERVER_URL}/todos/${uuid}/complete`, { method: "PUT" });
-    if (res.ok) await fetchTodos();
+    try {
+        const res = await fetch(`${SERVER_URL}/todos/${uuid}/complete`, { method: "PUT" });
+        await fetchTodos();
+    } catch (error) {
+        errorMessage.value = `Error: Toggling Complete : ${error.message}`;
+    }
 }
 
 async function clearCompleted() {
-    const res = await fetch(`${SERVER_URL}/todos/clear`, { method: "DELETE" });
-    if (res.ok) await fetchTodos();
+    try {
+        const res = await fetch(`${SERVER_URL}/todos/clear`, { method: "DELETE" });
+        await fetchTodos();
+    } catch (error) {
+        errorMessage.value = `Error: Clearing Completed : ${error.message}`;
+    }
 }
 </script>
