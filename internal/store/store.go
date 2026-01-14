@@ -69,8 +69,8 @@ func Create(newTodo todo.Todo) (*todo.Todo, error) {
 	return &newTodo, nil
 }
 
-// MarkComplete marks the todo with the given UUID as completed.
-func MarkComplete(uuid todo.TodoUUID) error {
+// ToggleComplete toggles the completion status of the todo with the given UUID.
+func ToggleComplete(uuid todo.TodoUUID) error {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -82,7 +82,7 @@ func MarkComplete(uuid todo.TodoUUID) error {
 	found := false
 	for i, t := range todos {
 		if t.UUID == uuid {
-			todos[i].Completed = true
+			todos[i].Completed = !todos[i].Completed
 			found = true
 			break
 		}
@@ -91,31 +91,6 @@ func MarkComplete(uuid todo.TodoUUID) error {
 		return errors.New("todo not found")
 	}
 	return saveTodos(todos)
-}
-
-// Delete removes the todo with the given UUID.
-func Delete(uuid todo.TodoUUID) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	todos, err := loadTodos()
-	if err != nil {
-		return err
-	}
-
-	newTodos := make([]todo.Todo, 0, len(todos))
-	found := false
-	for _, t := range todos {
-		if t.UUID == uuid {
-			found = true
-			continue
-		}
-		newTodos = append(newTodos, t)
-	}
-	if !found {
-		return errors.New("todo not found")
-	}
-	return saveTodos(newTodos)
 }
 
 // ClearCompleted deletes all completed todos.

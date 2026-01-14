@@ -37,28 +37,14 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newTodo)
 }
 
-// MarkTodoComplete handles PUT /todos/{uuid}/complete
-func MarkTodoComplete(w http.ResponseWriter, r *http.Request) {
+// ToggleComplete handles PUT /todos/{uuid}/complete
+func ToggleComplete(w http.ResponseWriter, r *http.Request) {
 	uuidString := r.PathValue("uuid")
 	if uuidString == "" {
 		http.Error(w, "Missing UUID", http.StatusBadRequest)
 		return
 	}
-	if err := store.MarkComplete(todo.TodoUUID(uuidString)); err != nil {
-		http.Error(w, "Todo not found", http.StatusNotFound)
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
-}
-
-// DeleteTodo handles DELETE /todos/:id
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
-	uuidString := r.PathValue("uuid")
-	if uuidString == "" {
-		http.Error(w, "Missing UUID", http.StatusBadRequest)
-		return
-	}
-	if err := store.Delete(todo.TodoUUID(uuidString)); err != nil {
+	if err := store.ToggleComplete(todo.TodoUUID(uuidString)); err != nil {
 		http.Error(w, "Todo not found", http.StatusNotFound)
 		return
 	}

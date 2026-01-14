@@ -41,36 +41,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Entry from "@/components/Entry.vue";
 import Todo from "@/components/Todo.vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
+import { SERVER_URL } from "@/main";
 
-const todos = ref<{ uuid: string; title: string; completed: boolean }[]>([
-    { uuid: crypto.randomUUID(), title: "TODO Item", completed: false },
-    { uuid: crypto.randomUUID(), title: "Another TODO Item", completed: true },
-]);
+const todos = ref<{ uuid: string; title: string; completed: boolean }[]>([]);
 const outstandingTodos = computed(() => todos.value.filter((todo) => !todo.completed));
 const completedTodos = computed(() => todos.value.filter((todo) => todo.completed));
 
-function addTodo(title: string) {
-    todos.value.push({
-        uuid: crypto.randomUUID(),
-        title,
-        completed: false,
+async function fetchTodos() {
+    const res = await fetch(`${SERVER_URL}/todos`);
+    todos.value = await res.json();
+}
+onMounted(fetchTodos);
+
+async function addTodo(title: string) {
+    const res = await fetch(`${SERVER_URL}/todos/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
     });
+    if (res.ok) await fetchTodos();
 }
 
-function toggleCompleted(uuid: string) {
-    todos.value = todos.value.map((todo) => {
-        if (todo.uuid === uuid) {
-            return { ...todo, completed: !todo.completed };
-        }
-        return todo;
-    });
+async function toggleCompleted(uuid: string) {
+    const res = await fetch(`${SERVER_URL}/todos/${uuid}/complete`, { method: "PUT" });
+    if (res.ok) await fetchTodos();
 }
 
-function clearCompleted() {
-    todos.value = todos.value.filter((todo) => !todo.completed);
+async function clearCompleted() {
+    const res = await fetch(`${SERVER_URL}/todos/clear`, { method: "DELETE" });
+    if (res.ok) await fetchTodos();
 }
 </script>
