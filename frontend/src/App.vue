@@ -69,9 +69,14 @@ watch(errorMessage, (newError) => {
     }
 });
 
-const todos = ref<{ uuid: string; title: string; completed: boolean }[]>([]);
-const outstandingTodos = computed(() => todos.value.filter((todo) => !todo.completed));
-const completedTodos = computed(() => todos.value.filter((todo) => todo.completed));
+const todos = ref<{ uuid: string; title: string; completed: boolean; created_at: string }[]>([]);
+const outstandingTodos = computed(() =>
+    todos.value.filter((todo) => !todo.completed).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+);
+
+const completedTodos = computed(() =>
+    todos.value.filter((todo) => todo.completed).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+);
 
 async function fetchTodos() {
     try {
