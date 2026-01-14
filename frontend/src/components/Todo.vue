@@ -8,7 +8,9 @@
                 @click="emit('completed', !completed)"
                 :class="{ 'checkbox-primary': !completed, 'checkbox-primary/50': completed }"
             />
-            <span :style="{ textDecoration: completed ? 'line-through' : 'none' }" :class="{ 'text-gray-500': completed }">{{ title }}</span>
+            <span class="overflow-x-auto" :style="{ textDecoration: completed ? 'line-through' : 'none' }" :class="{ 'text-gray-500': completed }">{{
+                title
+            }}</span>
         </div>
     </div>
 </template>
