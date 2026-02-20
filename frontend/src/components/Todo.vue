@@ -30,20 +30,36 @@ const emit = defineEmits(["completed"]);
 
 // Function to convert URLs in text to clickable links
 function linkifyText(text: string): string {
+    // Escape HTML entities in the input text first
+    const escapeHtml = (str: string): string => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    };
+    
     // Regular expression to match URLs
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     
+    // Escape the entire text first
+    const escapedText = escapeHtml(text);
+    
     // Replace URLs with anchor tags
-    return text.replace(urlRegex, (url) => {
+    return escapedText.replace(urlRegex, (url) => {
         // Remove trailing punctuation that might not be part of the URL
         let cleanUrl = url;
-        const trailingPunctuation = /[.,;!?)]+$/;
+        const trailingPunctuation = /[.,;!?)}\]]+$/;
         const match = url.match(trailingPunctuation);
         let trailing = '';
         
         if (match) {
             trailing = match[0];
             cleanUrl = url.slice(0, -trailing.length);
+        }
+        
+        // Validate that the URL starts with http:// or https://
+        // This prevents javascript: or data: URLs
+        if (!cleanUrl.match(/^https?:\/\//i)) {
+            return url; // Return original text if not a valid http(s) URL
         }
         
         return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline" onclick="event.stopPropagation()">${cleanUrl}</a>${trailing}`;
