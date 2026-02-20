@@ -79,7 +79,6 @@ function linkifyText(text: string): string {
     }
     
     result += escapeHtml(text.substring(lastIndex));
-    
     return result;
 }
 
