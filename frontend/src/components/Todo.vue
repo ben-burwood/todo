@@ -8,18 +8,47 @@
                 @click="emit('completed', !completed)"
                 :class="{ 'checkbox-primary': !completed, 'checkbox-primary/50': completed }"
             />
-            <span class="overflow-x-auto" :style="{ textDecoration: completed ? 'line-through' : 'none' }" :class="{ 'text-gray-500': completed }">{{
-                title
-            }}</span>
+            <span 
+                class="overflow-x-auto" 
+                :style="{ textDecoration: completed ? 'line-through' : 'none' }" 
+                :class="{ 'text-gray-500': completed }"
+                v-html="linkifiedTitle"
+            ></span>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+
 const props = defineProps<{
     title: string;
     completed: boolean;
 }>();
 
 const emit = defineEmits(["completed"]);
+
+// Function to convert URLs in text to clickable links
+function linkifyText(text: string): string {
+    // Regular expression to match URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    // Replace URLs with anchor tags
+    return text.replace(urlRegex, (url) => {
+        // Remove trailing punctuation that might not be part of the URL
+        let cleanUrl = url;
+        const trailingPunctuation = /[.,;!?)]+$/;
+        const match = url.match(trailingPunctuation);
+        let trailing = '';
+        
+        if (match) {
+            trailing = match[0];
+            cleanUrl = url.slice(0, -trailing.length);
+        }
+        
+        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline" onclick="event.stopPropagation()">${cleanUrl}</a>${trailing}`;
+    });
+}
+
+const linkifiedTitle = computed(() => linkifyText(props.title));
 </script>
