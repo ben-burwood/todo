@@ -28,9 +28,8 @@ const props = defineProps<{
 
 const emit = defineEmits(["completed"]);
 
-// Function to convert URLs in text to clickable links
+// Convert URLs to clickable links (anchor tags)
 function linkifyText(text: string): string {
-    // Escape HTML entities using a string-based approach
     const escapeHtml = (str: string): string => {
         return str
             .replace(/&/g, '&amp;')
@@ -40,10 +39,8 @@ function linkifyText(text: string): string {
             .replace(/'/g, '&#039;');
     };
     
-    // Regular expression to match URLs (excluding HTML special characters)
     const urlRegex = /(https?:\/\/[^\s<>"]+)/g;
     
-    // Find all URLs and their positions before escaping
     const urlMatches: { url: string; start: number; end: number }[] = [];
     let match;
     while ((match = urlRegex.exec(text)) !== null) {
@@ -54,31 +51,26 @@ function linkifyText(text: string): string {
         });
     }
     
-    // Build the result by processing text segments
     let result = '';
     let lastIndex = 0;
     
     for (const urlMatch of urlMatches) {
-        // Add escaped text before the URL
         result += escapeHtml(text.substring(lastIndex, urlMatch.start));
         
-        // Process the URL
         let url = urlMatch.url;
         let cleanUrl = url;
+				let trailing = '';
+
         const trailingPunctuation = /[.,;!?)\}\]]+$/;
         const punctMatch = url.match(trailingPunctuation);
-        let trailing = '';
-        
         if (punctMatch) {
             trailing = punctMatch[0];
             cleanUrl = url.slice(0, -trailing.length);
         }
         
-        // Validate that the URL starts with http:// or https://
         if (!cleanUrl.match(/^https?:\/\//i)) {
             result += escapeHtml(url);
         } else {
-            // Encode the URL for safe insertion in href attribute
             const encodedUrl = encodeURI(cleanUrl);
             result += `<a href="${encodedUrl}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline" onclick="event.stopPropagation()">${escapeHtml(cleanUrl)}</a>${escapeHtml(trailing)}`;
         }
@@ -86,7 +78,6 @@ function linkifyText(text: string): string {
         lastIndex = urlMatch.end;
     }
     
-    // Add any remaining text after the last URL
     result += escapeHtml(text.substring(lastIndex));
     
     return result;
