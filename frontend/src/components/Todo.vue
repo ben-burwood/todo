@@ -40,8 +40,8 @@ function linkifyText(text: string): string {
             .replace(/'/g, '&#039;');
     };
     
-    // Regular expression to match URLs
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    // Regular expression to match URLs (excluding HTML special characters)
+    const urlRegex = /(https?:\/\/[^\s<>"]+)/g;
     
     // Find all URLs and their positions before escaping
     const urlMatches: { url: string; start: number; end: number }[] = [];
