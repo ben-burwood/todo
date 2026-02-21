@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"todo/internal/api"
 	"todo/internal/store"
@@ -10,7 +9,7 @@ import (
 func main() {
 	// Initialize the database
 	if err := store.Initialize(); err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		panic(err)
 	}
 	defer store.Close()
 
