@@ -1,9 +1,9 @@
 <template>
     <div class="min-h-screen min-w-screen bg-base-200">
-        <ThemeSwitcher class="absolute top-4 right-4" />
+        <ThemeSwitcher class="absolute top-4 right-4 hidden md:block" />
 
         <div class="flex flex-col items-center justify-center p-5 w-full max-w-lg mx-auto">
-            <h1 class="text-4xl font-bold">ToDo</h1>
+            <h1 class="text-4xl font-bold hidden md:block">ToDo</h1>
 
             <Entry @add="addTodo" class="mt-5 w-full" />
             <div class="divider"></div>
