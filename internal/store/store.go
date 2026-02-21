@@ -29,7 +29,7 @@ func Initialize() error {
 		var err error
 		db, err = sql.Open("sqlite", TodoStoreFile)
 		if err != nil {
-			initErr = err
+			initErr = errors.New("failed to open SQLite database at " + TodoStoreFile + ": " + err.Error())
 			return
 		}
 
