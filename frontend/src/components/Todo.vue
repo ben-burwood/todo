@@ -74,6 +74,7 @@ const editedTodo = ref("");
 const editInput = ref<HTMLInputElement | null>(null);
 
 function startEdit() {
+    if (!EDIT_ENABLED) return;
     editedTodo.value = props.todo;
     isEditing.value = true;
     nextTick(() => {
