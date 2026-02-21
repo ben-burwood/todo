@@ -143,7 +143,7 @@ func Delete(uuid todo.TodoUUID) error {
 	if !found {
 		return errors.New("todo not found")
 	}
-	return saveTodos(todos)
+	return saveTodos(newTodos)
 }
 
 // ClearCompleted deletes all completed todos.
