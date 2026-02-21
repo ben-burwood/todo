@@ -75,6 +75,11 @@ func List() ([]todo.Todo, error) {
 	}
 	defer rows.Close()
 
+	// return an empty slice if no todos are found
+	if !rows.Next() {
+		return []todo.Todo{}, nil
+	}
+
 	var todos []todo.Todo
 	for rows.Next() {
 		var t todo.Todo
