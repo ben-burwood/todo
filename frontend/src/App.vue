@@ -18,6 +18,7 @@
                     :completed="todo.completed"
                     @completed="toggleCompleted(todo.uuid)"
                     @edit="(newTitle) => updateTodo(todo.uuid, newTitle)"
+                    @delete="deleteTodo(todo.uuid)"
                 />
                 <div class="mt-10" v-if="completedTodos.length > 0">
                     <div class="flex flex-row justify-between items-center m-2 mb-4">
@@ -32,6 +33,7 @@
                             :completed="todo.completed"
                             @completed="toggleCompleted(todo.uuid)"
                             @edit="(newTitle) => updateTodo(todo.uuid, newTitle)"
+                            @delete="deleteTodo(todo.uuid)"
                         />
                     </div>
                 </div>
@@ -82,7 +84,7 @@ async function fetchTodos() {
     try {
         const res = await fetch(`${SERVER_URL}/todos`);
         todos.value = await res.json();
-    } catch (error) {
+    } catch (error: any) {
         errorMessage.value = `Error: Fetching Todos : ${error.message}`;
     }
 }
@@ -96,7 +98,7 @@ async function addTodo(title: string) {
             body: JSON.stringify({ title }),
         });
         await fetchTodos();
-    } catch (error) {
+    } catch (error: any) {
         errorMessage.value = `Error: Adding Todo : ${error.message}`;
     }
 }
@@ -105,7 +107,7 @@ async function toggleCompleted(uuid: string) {
     try {
         const res = await fetch(`${SERVER_URL}/todos/${uuid}/complete`, { method: "PUT" });
         await fetchTodos();
-    } catch (error) {
+    } catch (error: any) {
         errorMessage.value = `Error: Toggling Complete : ${error.message}`;
     }
 }
@@ -123,11 +125,23 @@ async function updateTodo(uuid: string, newTitle: string) {
     }
 }
 
+async function deleteTodo(uuid: string) {
+    if (!confirm("Are you sure you want to delete this todo?")) {
+        return;
+    }
+    try {
+        const res = await fetch(`${SERVER_URL}/todos/${uuid}`, { method: "DELETE" });
+        await fetchTodos();
+    } catch (error: any) {
+        errorMessage.value = `Error: Deleting Todo : ${error.message}`;
+    }
+}
+
 async function clearCompleted() {
     try {
         const res = await fetch(`${SERVER_URL}/todos/clear`, { method: "DELETE" });
         await fetchTodos();
-    } catch (error) {
+    } catch (error: any) {
         errorMessage.value = `Error: Clearing Completed : ${error.message}`;
     }
 }

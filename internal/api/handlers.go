@@ -72,6 +72,20 @@ func ToggleComplete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// DeleteTodo handles DELETE /todos/{uuid}
+func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+	uuidString := r.PathValue("uuid")
+	if uuidString == "" {
+		http.Error(w, "Missing UUID", http.StatusBadRequest)
+		return
+	}
+	if err := store.Delete(todo.TodoUUID(uuidString)); err != nil {
+		http.Error(w, "Todo not found", http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // ClearCompletedTodos handles DELETE /todos/completed
 func ClearCompletedTodos(w http.ResponseWriter, r *http.Request) {
 	if err := store.ClearCompleted(); err != nil {
