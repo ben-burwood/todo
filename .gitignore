@@ -1,4 +1,6 @@
 todos.json
+todos.db
+store/
 node_modules
 dist
 todo
