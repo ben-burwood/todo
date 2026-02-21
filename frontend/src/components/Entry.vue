@@ -1,7 +1,7 @@
 <template>
     <div class="join">
-        <input type="text" class="input w-full join-item" placeholder="New todo..." v-model="title" @keyup.enter="addTodo" />
-        <button class="btn btn-accent join-item" @click="addTodo" :disabled="title.trim() === ''">Add</button>
+        <input type="text" class="input w-full join-item" placeholder="New todo..." v-model="todo" @keyup.enter="addTodo" />
+        <button class="btn btn-accent join-item" @click="addTodo" :disabled="todo.trim() === ''">Add</button>
     </div>
 </template>
 
@@ -10,11 +10,11 @@ import { ref } from "vue";
 
 const emit = defineEmits(["add"]);
 
-const title = ref("");
+const todo = ref("");
 
 function addTodo() {
-    if (title.value.trim() === "") return;
-    emit("add", title.value);
-    title.value = "";
+    if (todo.value.trim() === "") return;
+    emit("add", todo.value);
+    todo.value = "";
 }
 </script>

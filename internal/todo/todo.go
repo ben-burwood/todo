@@ -11,16 +11,16 @@ type TodoUUID string
 type Todo struct {
 	UUID      TodoUUID  `json:"uuid"`
 	CreatedAt time.Time `json:"created_at"`
-	Title     string    `json:"title"`
+	ToDo      string    `json:"todo"`
 	Completed bool      `json:"completed"`
 }
 
 // NewTodo - Constructor to create a new Todo with a unique UUID and current time as created_at.
-func NewTodo(title string) *Todo {
+func NewTodo(todo string) *Todo {
 	return &Todo{
 		UUID:      TodoUUID(uuid.NewString()),
 		CreatedAt: time.Now(),
-		Title:     title,
+		ToDo:      todo,
 		Completed: false,
 	}
 }

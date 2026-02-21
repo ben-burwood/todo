@@ -21,13 +21,13 @@ func ListTodos(w http.ResponseWriter, r *http.Request) {
 // CreateTodo handles POST /todos
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		Title string `json:"title"`
+		ToDo string `json:"todo"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	newTodo, err := store.Create(*todo.NewTodo(req.Title))
+	newTodo, err := store.Create(*todo.NewTodo(req.ToDo))
 	if err != nil {
 		http.Error(w, "Failed to create todo", http.StatusInternalServerError)
 		return
@@ -45,13 +45,13 @@ func UpdateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		Title string `json:"title"`
+		ToDo string `json:"todo"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	if err := store.Update(todo.TodoUUID(uuidString), req.Title); err != nil {
+	if err := store.Update(todo.TodoUUID(uuidString), req.ToDo); err != nil {
 		http.Error(w, "Todo not found", http.StatusNotFound)
 		return
 	}

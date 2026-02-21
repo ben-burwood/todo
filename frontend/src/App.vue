@@ -14,10 +14,10 @@
                     v-else
                     v-for="todo in outstandingTodos"
                     :key="todo.uuid"
-                    :title="todo.title"
+                    :title="todo.todo"
                     :completed="todo.completed"
                     @completed="toggleCompleted(todo.uuid)"
-                    @edit="(newTitle) => updateTodo(todo.uuid, newTitle)"
+                    @edit="(updatedTodo) => updateTodo(todo.uuid, updatedTodo)"
                     @delete="deleteTodo(todo.uuid)"
                 />
                 <div class="mt-10" v-if="completedTodos.length > 0">
@@ -29,11 +29,9 @@
                         <Todo
                             v-for="todo in completedTodos"
                             :key="todo.uuid"
-                            :title="todo.title"
+                            :todo="todo.todo"
                             :completed="todo.completed"
                             @completed="toggleCompleted(todo.uuid)"
-                            @edit="(newTitle) => updateTodo(todo.uuid, newTitle)"
-                            @delete="deleteTodo(todo.uuid)"
                         />
                     </div>
                 </div>
@@ -71,7 +69,7 @@ watch(errorMessage, (newError) => {
     }
 });
 
-const todos = ref<{ uuid: string; title: string; completed: boolean; created_at: string }[]>([]);
+const todos = ref<{ uuid: string; todo: string; completed: boolean; created_at: string }[]>([]);
 const outstandingTodos = computed(() =>
     todos.value.filter((todo) => !todo.completed).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
 );
@@ -90,12 +88,12 @@ async function fetchTodos() {
 }
 onMounted(fetchTodos);
 
-async function addTodo(title: string) {
+async function addTodo(todo: string) {
     try {
         const res = await fetch(`${SERVER_URL}/todos/create`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title }),
+            body: JSON.stringify({ todo }),
         });
         await fetchTodos();
     } catch (error: any) {
@@ -112,12 +110,12 @@ async function toggleCompleted(uuid: string) {
     }
 }
 
-async function updateTodo(uuid: string, newTitle: string) {
+async function updateTodo(uuid: string, updatedTodo: string) {
     try {
         const res = await fetch(`${SERVER_URL}/todos/${uuid}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: newTitle }),
+            body: JSON.stringify({ todo: updatedTodo }),
         });
         await fetchTodos();
     } catch (error) {

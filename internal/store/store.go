@@ -55,7 +55,7 @@ func List() ([]todo.Todo, error) {
 	return loadTodos()
 }
 
-// Create adds a new todo with the given title.
+// Create adds a new todo.
 func Create(newTodo todo.Todo) (*todo.Todo, error) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -97,8 +97,8 @@ func ToggleComplete(uuid todo.TodoUUID) error {
 	return saveTodos(todos)
 }
 
-// Update updates the title of the todo with the given UUID.
-func Update(uuid todo.TodoUUID, newTitle string) error {
+// Update updates the todo with the given UUID.
+func Update(uuid todo.TodoUUID, updatedTodo string) error {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -110,7 +110,7 @@ func Update(uuid todo.TodoUUID, newTitle string) error {
 	found := false
 	for i, t := range todos {
 		if t.UUID == uuid {
-			todos[i].Title = newTitle
+			todos[i].ToDo = updatedTodo
 			found = true
 			break
 		}

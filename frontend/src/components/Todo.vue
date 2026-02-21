@@ -14,18 +14,18 @@
                 class="overflow-x-auto flex-1"
                 :style="{ textDecoration: completed ? 'line-through' : 'none' }"
                 :class="{ 'text-gray-500': completed }"
-                v-html="linkifiedTitle"
+                v-html="linkifiedTodo"
             ></span>
             <input
                 v-else
                 type="text"
                 class="input input-sm input-bordered flex-1"
-                v-model="editedTitle"
+                v-model="editedTodo"
                 @keyup.enter="saveEdit"
                 @keyup.esc="cancelEdit"
                 ref="editInput"
             />
-            <div class="flex gap-2">
+            <div v-if="!completed" class="flex gap-2">
                 <button v-if="!isEditing" class="btn btn-sm btn-ghost" @click="startEdit" :disabled="completed">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -37,7 +37,7 @@
                     </svg>
                 </button>
                 <template v-else>
-                    <button class="btn btn-sm btn-success" @click="saveEdit" :disabled="editedTitle.trim() === ''">
+                    <button class="btn btn-sm btn-success" @click="saveEdit" :disabled="editedTodo.trim() === ''">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
@@ -62,18 +62,18 @@
 import { computed, ref, nextTick } from "vue";
 
 const props = defineProps<{
-    title: string;
+    todo: string;
     completed: boolean;
 }>();
 
 const emit = defineEmits(["completed", "edit", "delete"]);
 
 const isEditing = ref(false);
-const editedTitle = ref("");
+const editedTodo = ref("");
 const editInput = ref<HTMLInputElement | null>(null);
 
 function startEdit() {
-    editedTitle.value = props.title;
+    editedTodo.value = props.todo;
     isEditing.value = true;
     nextTick(() => {
         editInput.value?.focus();
@@ -81,14 +81,14 @@ function startEdit() {
 }
 
 function saveEdit() {
-    if (editedTitle.value.trim() === "") return;
-    emit("edit", editedTitle.value);
+    if (editedTodo.value.trim() === "") return;
+    emit("edit", editedTodo.value);
     isEditing.value = false;
 }
 
 function cancelEdit() {
     isEditing.value = false;
-    editedTitle.value = "";
+    editedTodo.value = "";
 }
 
 // Convert URLs to clickable links (anchor tags)
@@ -139,6 +139,5 @@ function linkifyText(text: string): string {
     result += escapeHtml(text.substring(lastIndex));
     return result;
 }
-
-const linkifiedTitle = computed(() => linkifyText(props.title));
+const linkifiedTodo = computed(() => linkifyText(props.todo));
 </script>
