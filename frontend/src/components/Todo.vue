@@ -26,7 +26,7 @@
                 ref="editInput"
             />
             <div v-if="!completed" class="flex gap-2">
-                <button v-if="!isEditing" class="btn btn-sm btn-ghost" @click="startEdit" :disabled="completed">
+                <button v-if="!isEditing && EDIT_ENABLED" class="btn btn-sm btn-ghost" @click="startEdit" :disabled="completed">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
                             stroke-linecap="round"
@@ -36,7 +36,7 @@
                         />
                     </svg>
                 </button>
-                <template v-else>
+                <template v-else-if="isEditing">
                     <button class="btn btn-sm btn-success" @click="saveEdit" :disabled="editedTodo.trim() === ''">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -48,7 +48,7 @@
                         </svg>
                     </button>
                 </template>
-                <button @click="emit('delete')" class="btn btn-sm btn-ghost btn-circle text-error hover:bg-error/10" title="Delete todo">
+                <button v-if="DELETE_ENABLED" @click="emit('delete')" class="btn btn-sm btn-ghost btn-circle text-error hover:bg-error/10" title="Delete todo">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -60,6 +60,7 @@
 
 <script setup lang="ts">
 import { computed, ref, nextTick } from "vue";
+import { EDIT_ENABLED, DELETE_ENABLED } from "@/main";
 
 const props = defineProps<{
     todo: string;

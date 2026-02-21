@@ -14,7 +14,7 @@
                     v-else
                     v-for="todo in outstandingTodos"
                     :key="todo.uuid"
-                    :title="todo.todo"
+                    :todo="todo.todo"
                     :completed="todo.completed"
                     @completed="toggleCompleted(todo.uuid)"
                     @edit="(updatedTodo) => updateTodo(todo.uuid, updatedTodo)"
@@ -118,7 +118,7 @@ async function updateTodo(uuid: string, updatedTodo: string) {
             body: JSON.stringify({ todo: updatedTodo }),
         });
         await fetchTodos();
-    } catch (error) {
+    } catch (error: any) {
         errorMessage.value = `Error: Updating Todo : ${error.message}`;
     }
 }
