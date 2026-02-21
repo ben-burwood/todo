@@ -97,6 +97,31 @@ func ToggleComplete(uuid todo.TodoUUID) error {
 	return saveTodos(todos)
 }
 
+// Delete removes a todo with the given UUID.
+func Delete(uuid todo.TodoUUID) error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	todos, err := loadTodos()
+	if err != nil {
+		return err
+	}
+
+	found := false
+	newTodos := make([]todo.Todo, 0, len(todos))
+	for _, t := range todos {
+		if t.UUID == uuid {
+			found = true
+			continue
+		}
+		newTodos = append(newTodos, t)
+	}
+	if !found {
+		return errors.New("todo not found")
+	}
+	return saveTodos(newTodos)
+}
+
 // ClearCompleted deletes all completed todos.
 func ClearCompleted() error {
 	mu.Lock()
