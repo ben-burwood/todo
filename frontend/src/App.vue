@@ -113,9 +113,6 @@ async function toggleCompleted(uuid: string) {
 async function deleteTodo(uuid: string) {
     try {
         const res = await fetch(`${SERVER_URL}/todos/${uuid}`, { method: "DELETE" });
-        if (!res.ok) {
-            throw new Error(`Failed to delete todo: ${res.status}`);
-        }
         await fetchTodos();
     } catch (error: any) {
         errorMessage.value = `Error: Deleting Todo : ${error.message}`;
