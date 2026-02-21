@@ -111,6 +111,9 @@ async function toggleCompleted(uuid: string) {
 }
 
 async function deleteTodo(uuid: string) {
+    if (!confirm("Are you sure you want to delete this todo?")) {
+        return;
+    }
     try {
         const res = await fetch(`${SERVER_URL}/todos/${uuid}`, { method: "DELETE" });
         await fetchTodos();
