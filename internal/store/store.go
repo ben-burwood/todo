@@ -1,73 +1,78 @@
 package store
 
 import (
-	"encoding/json"
+	"database/sql"
 	"errors"
 	"os"
-	"sync"
 	"todo/internal/todo"
+
+	_ "modernc.org/sqlite"
 )
 
-const TodoStoreFile = "store/todos.json"
+const TodoStoreFile = "store/todos.db"
 
-var mu sync.Mutex
+var db *sql.DB
 
-// loadTodos reads the todos from the JSON file
-func loadTodos() ([]todo.Todo, error) {
-	file, err := os.Open(TodoStoreFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return []todo.Todo{}, nil // treat as empty list if file doesn't exist
-		}
-		return nil, err
-	}
-	defer file.Close()
-
-	var todos []todo.Todo
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&todos); err != nil && err.Error() != "EOF" {
-		return nil, err
-	}
-	return todos, nil
-}
-
-// saveTodos writes the todos to the JSON file
-func saveTodos(todos []todo.Todo) error {
+// Initialize sets up the database connection and creates tables
+func Initialize() error {
 	if err := os.MkdirAll("store", os.ModePerm); err != nil {
 		return err
 	}
 
-	file, err := os.Create(TodoStoreFile)
+	var err error
+	db, err = sql.Open("sqlite", TodoStoreFile)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(todos)
+	// Create todos table if it doesn't exist
+	schema := `
+	CREATE TABLE IF NOT EXISTS todos (
+		uuid TEXT PRIMARY KEY,
+		created_at DATETIME NOT NULL,
+		todo TEXT NOT NULL,
+		completed BOOLEAN NOT NULL DEFAULT 0
+	);
+	CREATE INDEX IF NOT EXISTS idx_completed ON todos(completed);
+	`
+	_, err = db.Exec(schema)
+	return err
+}
+
+// Close closes the database connection
+func Close() error {
+	if db != nil {
+		return db.Close()
+	}
+	return nil
 }
 
 // List returns all todos.
 func List() ([]todo.Todo, error) {
-	mu.Lock()
-	defer mu.Unlock()
-	return loadTodos()
+	rows, err := db.Query("SELECT uuid, created_at, todo, completed FROM todos ORDER BY created_at DESC")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var todos []todo.Todo
+	for rows.Next() {
+		var t todo.Todo
+		if err := rows.Scan(&t.UUID, &t.CreatedAt, &t.ToDo, &t.Completed); err != nil {
+			return nil, err
+		}
+		todos = append(todos, t)
+	}
+	return todos, rows.Err()
 }
 
 // Create adds a new todo.
 func Create(newTodo todo.Todo) (*todo.Todo, error) {
-	mu.Lock()
-	defer mu.Unlock()
-
-	todos, err := loadTodos()
+	_, err := db.Exec(
+		"INSERT INTO todos (uuid, created_at, todo, completed) VALUES (?, ?, ?, ?)",
+		newTodo.UUID, newTodo.CreatedAt, newTodo.ToDo, newTodo.Completed,
+	)
 	if err != nil {
-		return nil, err
-	}
-
-	todos = append(todos, newTodo)
-
-	if err := saveTodos(todos); err != nil {
 		return nil, err
 	}
 	return &newTodo, nil
@@ -75,92 +80,60 @@ func Create(newTodo todo.Todo) (*todo.Todo, error) {
 
 // ToggleComplete toggles the completion status of the todo with the given UUID.
 func ToggleComplete(uuid todo.TodoUUID) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	todos, err := loadTodos()
+	result, err := db.Exec(
+		"UPDATE todos SET completed = NOT completed WHERE uuid = ?",
+		uuid,
+	)
 	if err != nil {
 		return err
 	}
-
-	found := false
-	for i, t := range todos {
-		if t.UUID == uuid {
-			todos[i].Completed = !todos[i].Completed
-			found = true
-			break
-		}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
 	}
-	if !found {
+	if rowsAffected == 0 {
 		return errors.New("todo not found")
 	}
-	return saveTodos(todos)
+	return nil
 }
 
 // Update updates the todo with the given UUID.
 func Update(uuid todo.TodoUUID, updatedTodo string) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	todos, err := loadTodos()
+	result, err := db.Exec(
+		"UPDATE todos SET todo = ? WHERE uuid = ?",
+		updatedTodo, uuid,
+	)
 	if err != nil {
 		return err
 	}
-
-	found := false
-	for i, t := range todos {
-		if t.UUID == uuid {
-			todos[i].ToDo = updatedTodo
-			found = true
-			break
-		}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
 	}
-	if !found {
+	if rowsAffected == 0 {
 		return errors.New("todo not found")
 	}
-	return saveTodos(todos)
+	return nil
 }
 
 // Delete removes a todo with the given UUID.
 func Delete(uuid todo.TodoUUID) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	todos, err := loadTodos()
+	result, err := db.Exec("DELETE FROM todos WHERE uuid = ?", uuid)
 	if err != nil {
 		return err
 	}
-
-	found := false
-	newTodos := make([]todo.Todo, 0, len(todos))
-	for _, t := range todos {
-		if t.UUID == uuid {
-			found = true
-			continue
-		}
-		newTodos = append(newTodos, t)
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
 	}
-	if !found {
+	if rowsAffected == 0 {
 		return errors.New("todo not found")
 	}
-	return saveTodos(newTodos)
+	return nil
 }
 
 // ClearCompleted deletes all completed todos.
 func ClearCompleted() error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	todos, err := loadTodos()
-	if err != nil {
-		return err
-	}
-
-	newTodos := make([]todo.Todo, 0, len(todos))
-	for _, t := range todos {
-		if !t.Completed {
-			newTodos = append(newTodos, t)
-		}
-	}
-	return saveTodos(newTodos)
+	_, err := db.Exec("DELETE FROM todos WHERE completed = 1")
+	return err
 }
