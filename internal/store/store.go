@@ -97,6 +97,30 @@ func ToggleComplete(uuid todo.TodoUUID) error {
 	return saveTodos(todos)
 }
 
+// Update updates the title of the todo with the given UUID.
+func Update(uuid todo.TodoUUID, newTitle string) error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	todos, err := loadTodos()
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for i, t := range todos {
+		if t.UUID == uuid {
+			todos[i].Title = newTitle
+			found = true
+			break
+		}
+	}
+	if !found {
+		return errors.New("todo not found")
+	}
+	return saveTodos(todos)
+}
+
 // ClearCompleted deletes all completed todos.
 func ClearCompleted() error {
 	mu.Lock()
