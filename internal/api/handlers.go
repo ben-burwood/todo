@@ -37,6 +37,27 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newTodo)
 }
 
+// UpdateTodo handles PUT /todos/{uuid}
+func UpdateTodo(w http.ResponseWriter, r *http.Request) {
+	uuidString := r.PathValue("uuid")
+	if uuidString == "" {
+		http.Error(w, "Missing UUID", http.StatusBadRequest)
+		return
+	}
+	var req struct {
+		Title string `json:"title"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if err := store.Update(todo.TodoUUID(uuidString), req.Title); err != nil {
+		http.Error(w, "Todo not found", http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // ToggleComplete handles PUT /todos/{uuid}/complete
 func ToggleComplete(w http.ResponseWriter, r *http.Request) {
 	uuidString := r.PathValue("uuid")

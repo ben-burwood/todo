@@ -17,6 +17,7 @@
                     :title="todo.title"
                     :completed="todo.completed"
                     @completed="toggleCompleted(todo.uuid)"
+                    @edit="(newTitle) => updateTodo(todo.uuid, newTitle)"
                     @delete="deleteTodo(todo.uuid)"
                 />
                 <div class="mt-10" v-if="completedTodos.length > 0">
@@ -31,6 +32,7 @@
                             :title="todo.title"
                             :completed="todo.completed"
                             @completed="toggleCompleted(todo.uuid)"
+                            @edit="(newTitle) => updateTodo(todo.uuid, newTitle)"
                             @delete="deleteTodo(todo.uuid)"
                         />
                     </div>
@@ -107,6 +109,19 @@ async function toggleCompleted(uuid: string) {
         await fetchTodos();
     } catch (error: any) {
         errorMessage.value = `Error: Toggling Complete : ${error.message}`;
+    }
+}
+
+async function updateTodo(uuid: string, newTitle: string) {
+    try {
+        const res = await fetch(`${SERVER_URL}/todos/${uuid}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: newTitle }),
+        });
+        await fetchTodos();
+    } catch (error) {
+        errorMessage.value = `Error: Updating Todo : ${error.message}`;
     }
 }
 

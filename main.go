@@ -9,6 +9,7 @@ func main() {
 	webMux := http.NewServeMux()
 	webMux.HandleFunc("GET /todos", api.ListTodos)
 	webMux.HandleFunc("POST /todos/create", api.CreateTodo)
+	webMux.HandleFunc("PUT /todos/{uuid}", api.UpdateTodo)
 	webMux.HandleFunc("PUT /todos/{uuid}/complete", api.ToggleComplete)
 	webMux.HandleFunc("DELETE /todos/{uuid}", api.DeleteTodo)
 	webMux.HandleFunc("DELETE /todos/clear", api.ClearCompletedTodos)
