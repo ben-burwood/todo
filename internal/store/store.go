@@ -106,21 +106,11 @@ func ToggleComplete(uuid todo.TodoUUID) error {
 	if err := checkDB(); err != nil {
 		return err
 	}
-	result, err := db.Exec(
+	_, err := db.Exec(
 		"UPDATE todos SET completed = NOT completed WHERE uuid = ?",
 		uuid,
 	)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return errors.New("todo not found")
-	}
-	return nil
+	return err
 }
 
 // Update updates the todo with the given UUID.
@@ -128,21 +118,11 @@ func Update(uuid todo.TodoUUID, updatedTodo string) error {
 	if err := checkDB(); err != nil {
 		return err
 	}
-	result, err := db.Exec(
+	_, err := db.Exec(
 		"UPDATE todos SET todo = ? WHERE uuid = ?",
 		updatedTodo, uuid,
 	)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return errors.New("todo not found")
-	}
-	return nil
+	return err
 }
 
 // Delete removes a todo with the given UUID.
@@ -150,18 +130,8 @@ func Delete(uuid todo.TodoUUID) error {
 	if err := checkDB(); err != nil {
 		return err
 	}
-	result, err := db.Exec("DELETE FROM todos WHERE uuid = ?", uuid)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return errors.New("todo not found")
-	}
-	return nil
+	_, err := db.Exec("DELETE FROM todos WHERE uuid = ?", uuid)
+	return err
 }
 
 // ClearCompleted deletes all completed todos.
