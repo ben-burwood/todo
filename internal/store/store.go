@@ -41,7 +41,6 @@ func Initialize() error {
 			todo TEXT NOT NULL,
 			completed BOOLEAN NOT NULL DEFAULT 0
 		);
-		CREATE INDEX IF NOT EXISTS idx_completed ON todos(completed);
 		`
 		_, err = db.Exec(schema)
 		initErr = err
@@ -57,6 +56,7 @@ func Close() error {
 	return nil
 }
 
+// checkDB checks if the database is initialized
 func checkDB() error {
 	if db == nil {
 		return errors.New("database not initialized")
