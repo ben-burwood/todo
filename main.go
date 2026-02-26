@@ -3,9 +3,16 @@ package main
 import (
 	"net/http"
 	"todo/internal/api"
+	"todo/internal/store"
 )
 
 func main() {
+	// Initialize the database
+	if err := store.Initialize(); err != nil {
+		panic(err)
+	}
+	defer store.Close()
+
 	webMux := http.NewServeMux()
 	webMux.HandleFunc("GET /todos", api.ListTodos)
 	webMux.HandleFunc("POST /todos/create", api.CreateTodo)
