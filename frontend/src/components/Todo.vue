@@ -61,6 +61,9 @@
 <script setup lang="ts">
 import { computed, ref, nextTick } from "vue";
 import { EDIT_ENABLED, DELETE_ENABLED } from "@/main";
+import LinkifyIt from "linkify-it";
+
+const linkify = new LinkifyIt();
 
 const props = defineProps<{
     todo: string;
@@ -93,53 +96,26 @@ function cancelEdit() {
     editedTodo.value = "";
 }
 
-// Convert URLs to clickable links (anchor tags)
+const escapeHtml = (str: string): string =>
+    str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+
+// Convert URLs to clickable links using linkify-it
 function linkifyText(text: string): string {
-    const escapeHtml = (str: string): string => {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-    };
-
-    const urlRegex = /(https?:\/\/[^\s<>"]+)/g;
-
-    const urlMatches: { url: string; start: number; end: number }[] = [];
-    let match;
-    while ((match = urlRegex.exec(text)) !== null) {
-        urlMatches.push({
-            url: match[0],
-            start: match.index,
-            end: match.index + match[0].length,
-        });
-    }
+    const matches = linkify.match(text);
+    if (!matches) return escapeHtml(text);
 
     let result = "";
     let lastIndex = 0;
 
-    for (const urlMatch of urlMatches) {
-        result += escapeHtml(text.substring(lastIndex, urlMatch.start));
-
-        let url = urlMatch.url;
-        let cleanUrl = url;
-        let trailing = "";
-
-        const trailingPunctuation = /[.,;!?)\}\]]+$/;
-        const punctMatch = url.match(trailingPunctuation);
-        if (punctMatch) {
-            trailing = punctMatch[0];
-            cleanUrl = url.slice(0, -trailing.length);
-        }
-
-        if (!cleanUrl.match(/^https?:\/\//i)) {
-            result += escapeHtml(url);
-        } else {
-            const encodedUrl = encodeURI(cleanUrl);
-            result += `<a href="${encodedUrl}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline" onclick="event.stopPropagation()">${escapeHtml(cleanUrl)}</a>${escapeHtml(trailing)}`;
-        }
-
-        lastIndex = urlMatch.end;
+    for (const match of matches) {
+        result += escapeHtml(text.substring(lastIndex, match.index));
+        result += `<a href="${escapeHtml(encodeURI(match.url))}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline" onclick="event.stopPropagation()">${escapeHtml(match.text)}</a>`;
+        lastIndex = match.lastIndex;
     }
 
     result += escapeHtml(text.substring(lastIndex));
     return result;
 }
+
 const linkifiedTodo = computed(() => linkifyText(props.todo));
 </script>
