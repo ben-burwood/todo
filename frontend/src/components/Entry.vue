@@ -17,6 +17,6 @@ function addTodo() {
     if (!content) return;
 
     emit("add", content);
-    todo.value = "";
+    newTodo.value = "";
 }
 </script>
