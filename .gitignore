@@ -1,4 +1,7 @@
-todos.json
+store/*.db
+store/*.db-shm
+store/*.db-wal
+
 node_modules
 dist
 todo
