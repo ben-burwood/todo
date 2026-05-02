@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 	"todo/internal/store"
 	"todo/internal/todo"
 )
@@ -21,13 +22,22 @@ func ListTodos(w http.ResponseWriter, r *http.Request) {
 // CreateTodo handles POST /todos
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		ToDo string `json:"todo"`
+		ToDo      string    `json:"todo"`
+		UUID      string    `json:"uuid,omitempty"`
+		CreatedAt time.Time `json:"created_at,omitempty"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	newTodo, err := store.Create(*todo.NewTodo(req.ToDo))
+	t := *todo.NewTodo(req.ToDo)
+	if req.UUID != "" {
+		t.UUID = todo.TodoUUID(req.UUID)
+	}
+	if !req.CreatedAt.IsZero() {
+		t.CreatedAt = req.CreatedAt
+	}
+	newTodo, err := store.Create(t)
 	if err != nil {
 		http.Error(w, "Failed to create todo", http.StatusInternalServerError)
 		return

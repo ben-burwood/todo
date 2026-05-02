@@ -2,3 +2,5 @@ todos.json
 node_modules
 dist
 todo
+
+.claude

@@ -55,7 +55,9 @@ func List() ([]todo.Todo, error) {
 	return loadTodos()
 }
 
-// Create adds a new todo.
+// Create adds a new todo. If a todo with the same UUID already exists, it
+// returns the existing one without creating a duplicate, so retried syncs
+// from offline clients are idempotent.
 func Create(newTodo todo.Todo) (*todo.Todo, error) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -63,6 +65,13 @@ func Create(newTodo todo.Todo) (*todo.Todo, error) {
 	todos, err := loadTodos()
 	if err != nil {
 		return nil, err
+	}
+
+	for i, t := range todos {
+		if t.UUID == newTodo.UUID {
+			existing := todos[i]
+			return &existing, nil
+		}
 	}
 
 	todos = append(todos, newTodo)
