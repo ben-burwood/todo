@@ -39,7 +39,7 @@ func execAffectingOne(query string, args ...any) error {
 
 // List returns all todos.
 func List() ([]todo.Todo, error) {
-	rows, err := db.Query(`SELECT uuid, todo, completed, created_at FROM todos`)
+	rows, err := db.Query(`SELECT uuid, todo, completed, created_at FROM todos ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
 	}

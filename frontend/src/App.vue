@@ -80,13 +80,9 @@ watch(errorMessage, (newError) => {
 const { online } = useOnline();
 const todos = ref<TodoItem[]>([]);
 
-const outstandingTodos = computed(() =>
-    todos.value.filter((todo) => !todo.completed).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
-);
+const outstandingTodos = computed(() => todos.value.filter((todo) => !todo.completed));
 
-const completedTodos = computed(() =>
-    todos.value.filter((todo) => todo.completed).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
-);
+const completedTodos = computed(() => todos.value.filter((todo) => todo.completed));
 
 const pendingCount = computed(() => todos.value.filter((t) => t.pending).length);
 
@@ -96,7 +92,9 @@ function mergePending(serverList: TodoType[]): TodoItem[] {
     const stillPending = queued
         .filter((q) => !seen.has(q.uuid))
         .map<TodoItem>((q) => ({ uuid: q.uuid, todo: q.todo, completed: false, created_at: q.created_at, pending: true }));
-    return [...serverList, ...stillPending];
+    // Pending items are the freshest entries (just typed by the user). Server list
+    // arrives sorted by created_at DESC, so prepending pending preserves DESC order.
+    return [...stillPending, ...serverList];
 }
 
 async function fetchTodos() {
@@ -136,7 +134,7 @@ async function addTodo(content: string) {
         created_at: new Date().toISOString(),
         pending: true,
     };
-    todos.value.push(newTodo);
+    todos.value.unshift(newTodo);
     offlineQueue.enqueue({ uuid: newTodo.uuid, todo: newTodo.todo, created_at: newTodo.created_at });
 
     if (online.value) {
