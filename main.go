@@ -24,5 +24,5 @@ func main() {
 	webMux.Handle("/", http.FileServer(http.Dir("./frontend/dist")))
 
 	// Start web server on 8080
-	log.Fatal(http.ListenAndServe("[::]:8080", api.CORSMiddleware(webMux)))
+	log.Fatal(http.ListenAndServe("[::]:8080", webMux))
 }
