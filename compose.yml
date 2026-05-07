@@ -7,3 +7,5 @@ services:
       - 8080:8080
     volumes:
       - ./store:/store
+    environment:
+      - TODO_API_KEY

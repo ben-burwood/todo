@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"todo/internal/api"
 	"todo/internal/store"
 )
@@ -20,6 +21,11 @@ func main() {
 	webMux.HandleFunc("PUT /todos/{uuid}/complete", api.ToggleComplete)
 	webMux.HandleFunc("DELETE /todos/{uuid}", api.DeleteTodo)
 	webMux.HandleFunc("DELETE /todos/clear", api.ClearCompletedTodos)
+
+	// API Backend
+	apiKey := os.Getenv("TODO_API_KEY")
+	webMux.Handle("POST /api/todos", api.RequireBearerToken(apiKey, http.HandlerFunc(api.CreateTodo)))
+
 	// Serve Static Frontend
 	webMux.Handle("/", http.FileServer(http.Dir("./frontend/dist")))
 

@@ -4,6 +4,5 @@ store/*.db-wal
 
 node_modules
 dist
-todo
 
 .claude
