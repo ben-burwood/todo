@@ -37,11 +37,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,ico,png,woff2}'],
-        navigateFallback: '/index.html',
-        // Don't cache /todos* API responses — JS layer owns offline behavior
-        // for those, and SW caching would mask real network state.
-        navigateFallbackDenylist: [/^\/todos/],
-        runtimeCaching: [],
+        // NetworkFirst for navigations so auth-proxy redirects reach the browser
+        // instead of being short-circuited by a cached index.html.
+        navigateFallback: null,
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'app-shell',
+              networkTimeoutSeconds: 3,
+            },
+          },
+        ],
       },
     }),
   ],
