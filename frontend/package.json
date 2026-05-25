@@ -11,7 +11,8 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "generate-pwa-assets": "pwa-assets-generator"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",
+    "@vite-pwa/assets-generator": "^1.0.0",
     "@types/node": "^25.9.1",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
