@@ -193,9 +193,28 @@ watch(online, (isOnline) => {
     if (isOnline) syncWithServer();
 });
 
+function consumeSharedPayload(): string | null {
+    const params = new URLSearchParams(window.location.search);
+    const title = (params.get("title") ?? "").trim();
+    const text = (params.get("text") ?? "").trim();
+    const url = (params.get("url") ?? "").trim();
+    if (!title && !text && !url) return null;
+
+    history.replaceState({}, "", window.location.pathname);
+
+    const base = text || title;
+    if (url && !base.includes(url)) {
+        return base ? `${base} ${url}` : url;
+    }
+    return base || null;
+}
+
 onMounted(async () => {
     todos.value = mergePending(todosCache.load());
-    if (online.value) {
+    const shared = consumeSharedPayload();
+    if (shared) {
+        await addTodo(shared);
+    } else if (online.value) {
         await syncWithServer();
     }
 });
