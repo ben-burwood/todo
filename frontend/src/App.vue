@@ -63,6 +63,7 @@ import Entry from "@/components/Entry.vue";
 import Todo from "@/components/Todo.vue";
 import ThemeSwitcher from "@/components/ThemeSwitcher.vue";
 import { SERVER_URL } from "@/main";
+import { apiFetch, AuthRedirectError } from "@/services/api";
 import * as offlineQueue from "@/services/offlineQueue";
 import * as todosCache from "@/services/todosCache";
 import { useOnline } from "@/composables/useOnline";
@@ -99,12 +100,13 @@ function mergePending(serverList: TodoType[]): TodoItem[] {
 
 async function fetchTodos() {
     try {
-        const res = await fetch(`${SERVER_URL}/todos`);
+        const res = await apiFetch(`${SERVER_URL}/todos`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const fresh: TodoType[] = await res.json();
         todosCache.save(fresh);
         todos.value = mergePending(fresh);
     } catch (error: any) {
+        if (error instanceof AuthRedirectError) return;
         if (!online.value) {
             // Offline — cached list (already in todos.value) is the best we have.
             return;
@@ -144,17 +146,18 @@ async function addTodo(content: string) {
 
 async function toggleCompleted(uuid: string) {
     try {
-        const res = await fetch(`${SERVER_URL}/todos/${uuid}/complete`, { method: "PUT" });
+        const res = await apiFetch(`${SERVER_URL}/todos/${uuid}/complete`, { method: "PUT" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         await fetchTodos();
     } catch (error: any) {
+        if (error instanceof AuthRedirectError) return;
         errorMessage.value = `Error: Toggling Complete : ${error.message}`;
     }
 }
 
 async function updateTodo(uuid: string, updatedTodo: string) {
     try {
-        const res = await fetch(`${SERVER_URL}/todos/${uuid}`, {
+        const res = await apiFetch(`${SERVER_URL}/todos/${uuid}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ todo: updatedTodo }),
@@ -162,6 +165,7 @@ async function updateTodo(uuid: string, updatedTodo: string) {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         await fetchTodos();
     } catch (error: any) {
+        if (error instanceof AuthRedirectError) return;
         errorMessage.value = `Error: Updating Todo : ${error.message}`;
     }
 }
@@ -171,20 +175,22 @@ async function deleteTodo(uuid: string) {
         return;
     }
     try {
-        const res = await fetch(`${SERVER_URL}/todos/${uuid}`, { method: "DELETE" });
+        const res = await apiFetch(`${SERVER_URL}/todos/${uuid}`, { method: "DELETE" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         await fetchTodos();
     } catch (error: any) {
+        if (error instanceof AuthRedirectError) return;
         errorMessage.value = `Error: Deleting Todo : ${error.message}`;
     }
 }
 
 async function clearCompleted() {
     try {
-        const res = await fetch(`${SERVER_URL}/todos/clear`, { method: "DELETE" });
+        const res = await apiFetch(`${SERVER_URL}/todos/clear`, { method: "DELETE" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         await fetchTodos();
     } catch (error: any) {
+        if (error instanceof AuthRedirectError) return;
         errorMessage.value = `Error: Clearing Completed : ${error.message}`;
     }
 }

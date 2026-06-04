@@ -1,5 +1,6 @@
 import type { PendingTodo } from "@/types/todo";
 import { readJSONArray, writeJSON } from "@/services/storage";
+import { apiFetch } from "@/services/api";
 
 export type FlushOutcome = {
     synced: PendingTodo[];
@@ -31,7 +32,7 @@ export async function flush(serverUrl: string): Promise<FlushOutcome> {
     for (const item of list()) {
         let res: Response;
         try {
-            res = await fetch(`${serverUrl}/todos/create`, {
+            res = await apiFetch(`${serverUrl}/todos/create`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ todo: item.todo, uuid: item.uuid, created_at: item.created_at }),
