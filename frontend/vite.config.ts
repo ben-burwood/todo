@@ -10,6 +10,9 @@ export default defineConfig({
     vue(),
     tailwindcss(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'pwa-icon.svg', 'apple-touch-icon-180x180.png'],
       manifest: {
@@ -37,21 +40,8 @@ export default defineConfig({
           },
         },
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,ico,png,woff2}'],
-        // NetworkFirst for navigations so auth-proxy redirects reach the browser
-        // instead of being short-circuited by a cached index.html.
-        navigateFallback: null,
-        runtimeCaching: [
-          {
-            urlPattern: ({ request }) => request.mode === 'navigate',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'app-shell',
-              networkTimeoutSeconds: 3,
-            },
-          },
-        ],
       },
     }),
   ],
