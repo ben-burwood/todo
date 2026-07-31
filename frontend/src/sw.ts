@@ -10,14 +10,10 @@ clientsClaim()
 
 // Precache the built assets injected by vite-plugin-pwa.
 precacheAndRoute(self.__WB_MANIFEST, {
-  directoryIndex: null,
+  directoryIndex: '', // falsy
   cleanURLs: false,
 })
 
-// Navigations go to the network with redirect:'manual', so Caddy's cross-origin
-// 302 to auth.domain becomes an opaqueredirect the browser follows natively
-// (no more cached-shell short-circuit / reload loop). Fall back to the precached
-// shell ONLY on a real network failure (genuinely offline).
 registerRoute(
   new NavigationRoute(async ({ request }) => {
     try {
