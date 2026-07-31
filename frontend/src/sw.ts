@@ -9,7 +9,10 @@ self.skipWaiting()
 clientsClaim()
 
 // Precache the built assets injected by vite-plugin-pwa.
-precacheAndRoute(self.__WB_MANIFEST)
+precacheAndRoute(self.__WB_MANIFEST, {
+  directoryIndex: null,
+  cleanURLs: false,
+})
 
 // Navigations go to the network with redirect:'manual', so Caddy's cross-origin
 // 302 to auth.domain becomes an opaqueredirect the browser follows natively
