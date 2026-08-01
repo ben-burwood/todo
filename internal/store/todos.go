@@ -2,7 +2,6 @@ package store
 
 import (
 	"errors"
-	"time"
 	"todo/internal/todo"
 )
 
@@ -10,15 +9,9 @@ var ErrNotFound = errors.New("todo not found")
 
 func scanTodo(scanner interface{ Scan(dest ...any) error }) (todo.Todo, error) {
 	var t todo.Todo
-	var createdAt string
-	if err := scanner.Scan(&t.UUID, &t.ToDo, &t.Completed, &createdAt); err != nil {
+	if err := scanner.Scan(&t.UUID, &t.ToDo, &t.Completed, &t.CreatedAt); err != nil {
 		return todo.Todo{}, err
 	}
-	parsed, err := time.Parse(time.RFC3339Nano, createdAt)
-	if err != nil {
-		return todo.Todo{}, err
-	}
-	t.CreatedAt = parsed
 	return t, nil
 }
 
@@ -69,7 +62,7 @@ func Create(newTodo todo.Todo) (*todo.Todo, error) {
 		newTodo.UUID,
 		newTodo.ToDo,
 		newTodo.Completed,
-		newTodo.CreatedAt.Format(time.RFC3339Nano),
+		newTodo.CreatedAt,
 	)
 	t, err := scanTodo(row)
 	if err != nil {
