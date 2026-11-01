@@ -15,7 +15,7 @@
     "generate-pwa-assets": "pwa-assets-generator"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/linkify-it": "^5.0.0",
     "linkify-it": "^5.0.1",
     "tailwindcss": "^4.3.3",
