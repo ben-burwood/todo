@@ -17,7 +17,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/linkify-it": "^5.0.0",
-    "linkify-it": "^5.0.1",
+    "linkify-it": "^6.1.0",
     "tailwindcss": "^4.3.3",
     "theme-change": "^2.5.0",
     "vue": "^3.5.39"
