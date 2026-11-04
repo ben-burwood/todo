@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "@types/linkify-it": "^5.0.0",
     "linkify-it": "^6.1.0",
     "tailwindcss": "^4.3.3",
     "theme-change": "^3.0.4",
@@ -24,8 +23,8 @@
   },
   "devDependencies": {
     "@tsconfig/node24": "^24.0.4",
-    "@vite-pwa/assets-generator": "^1.0.0",
     "@types/node": "^26.6.6",
+    "@vite-pwa/assets-generator": "^1.0.0",
     "@vitejs/plugin-vue": "^6.0.7",
     "@vue/tsconfig": "^0.9.1",
     "daisyui": "^5.7.50",

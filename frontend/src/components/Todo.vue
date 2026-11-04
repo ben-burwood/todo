@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { computed, ref, nextTick } from "vue";
 import { EDIT_ENABLED, DELETE_ENABLED } from "@/main";
-import LinkifyIt from "linkify-it";
+import { LinkifyIt } from "linkify-it";
 
 const linkify = new LinkifyIt();
 
