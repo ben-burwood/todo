@@ -11,6 +11,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ToDo">
     <title>ToDo</title>
+    <script>
+      if (!localStorage.getItem("theme")) {
+        localStorage.setItem("theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      }
+      document.documentElement.setAttribute("data-theme", localStorage.getItem("theme"));
+    </script>
   </head>
   <body>
     <div id="app"></div>
